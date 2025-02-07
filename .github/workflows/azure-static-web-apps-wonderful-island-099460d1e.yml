@@ -41,7 +41,7 @@ jobs:
       - name: Update Cosmos DB connection string in config
         run: |
           echo "Updating Cosmos DB connection string in staticwebapp.database.config.json"
-          sed -i "s|\"connection-string\": \"\"|\"connection-string\": \"${{ secrets.COSMOSDB_CONNECTION_STRING }}\"|g" staticwebapp.database.config.json
+          sed -i "s|\"connection-string\": \"\"|\"connection-string\": \"${{ secrets.COSMOSDB_CONNECTION_STRING }}\"|g" ./swa-db-connections/staticwebapp.database.config.json
 
       # Build and Deploy
       - name: Build And Deploy
