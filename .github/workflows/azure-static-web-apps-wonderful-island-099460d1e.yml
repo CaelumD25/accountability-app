@@ -43,6 +43,13 @@ jobs:
           echo "Updating Cosmos DB connection string in staticwebapp.database.config.json"
           sed -i "s|\"connection-string\": \"\"|\"connection-string\": \"${{ secrets.COSMOSDB_CONNECTION_STRING }}\"|g" ./swa-db-connections/staticwebapp.database.config.json
 
+      # Install dependencies and build TypeScript
+      - name: Install Dependencies & Build API
+        run: |
+          cd api
+          npm install
+          npm run build
+
       # Build and Deploy
       - name: Build And Deploy
         id: builddeploy
