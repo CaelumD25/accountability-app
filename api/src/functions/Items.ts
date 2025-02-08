@@ -1,32 +1,28 @@
-import {CosmosClient} from "@azure/cosmos";
+import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
+import { CosmosClient } from "@azure/cosmos";
 
-const client = new CosmosClient({ endpoint: process.env["COSMOSDB_ENDPOINT"], key: process.env["COSMOSDB_KEY"] });
+// Environment variables for Cosmos DB
+const client = new CosmosClient({
+    endpoint: process.env.COSMOS_DB_ENDPOINT || "",
+    key: process.env.COSMOS_DB_KEY || ""
+});
 
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+const databaseId = process.env.COSMOS_DB_DATABASE || "my-database";
+const containerId = process.env.COSMOS_DB_CONTAINER || "my-container";
 
-    const database = client.database("DataStore");
-    const container = database.container("PeopleData");
+export async function items(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+    context.log("Fetching items from Cosmos DB...");
 
-    if(req.method === "GET"){ //return all items
-        try {
-            const { resources } = await container.items.readAll().fetchAll();
-            context.res = {
-                status: 200,
-                body: resources
-            };
-        } catch (error) {
-            context.res = {
-                status: 500,
-                body: `Error retrieving items from the database: ${error.message}`
-            };
-        }
-    }
-	//[ POST, PUT AND DELETE ENDPOINTS OMITTED FOR SIMPLICITY, AVAILABLE IN SOURCE CODE ]
-else {
-        context.res = {
-            status: 405,
-            body: "Method Not Allowed"
-        };
+    try {
+        const { resources: items } = await client.database(databaseId).container(containerId).items.readAll().fetchAll();
+        return { status: 200, body: JSON.stringify(items), headers: { "Content-Type": "application/json" } };
+    } catch (error) {
+        return { status: 500, body: `Error: ${error.message}` };
     }
 }
+
+app.http('items', {
+    methods: ['GET'],
+    authLevel: 'anonymous',
+    handler: items
+});
