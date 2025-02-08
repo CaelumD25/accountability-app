@@ -7,11 +7,11 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  const callItems = () => {
+  const callItems = async ()  => {
     fetch("/api/items")
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
-          setItems(response.json());
+          setItems(await response.json());
           throw new Error("Network response was not ok");
         }
         return response.json();
@@ -28,7 +28,8 @@ const Home = () => {
     callItems();
   }, []);
 
-  return <>Items: {items}
+  return <>
+    Items: {items}
     <div>
       <button onClick={() => navigate("/Items")}>Go to Items</button>
     </div>
