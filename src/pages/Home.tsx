@@ -1,8 +1,11 @@
 import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 
 
 const Home = () => {
   const [items, setItems] = useState([])
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("/api/Items")
@@ -20,6 +23,6 @@ const Home = () => {
       });
   }, []);
 
-  return <>{items}</>
+  return <>Items: {items} <button onClick={() => navigate("/Items")}>Add</button></>
 }
 export default Home;
