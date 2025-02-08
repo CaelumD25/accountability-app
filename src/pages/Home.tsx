@@ -3,21 +3,21 @@ import {useNavigate} from "react-router-dom";
 
 
 const Home = () => {
-  const [items, setItems] = useState<[]|string>("Loading...")
+  const [blunders, setBlunders] = useState<[]|string>("Loading...")
 
   const navigate = useNavigate();
 
-  const callItems = async ()  => {
-    fetch("/api/items")
+  const callBlunders = async ()  => {
+    fetch("/api/blunders")
       .then(async (response) => {
         if (!response.ok) {
-          setItems(await response.json());
           throw new Error("Network response was not ok");
         }
         return response.json();
       })
       .then((data) => {
-        setItems(data);
+        const value = data[0]["$1"];
+        setBlunders(value);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -25,16 +25,20 @@ const Home = () => {
   }
 
   useEffect(() => {
-    callItems();
+    callBlunders();
   }, []);
 
+  const addBlunders = async (): Promise<void> => {
+    await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: 1})});
+  }
+
   return <>
-    Items: {items}
+    Blunders: {blunders.toString}
     <div>
       <button onClick={() => navigate("/Items")}>Go to Items</button>
     </div>
     <div>
-      <button onClick={() => callItems()}>Request API Again</button>
+      <button onClick={() => addBlunders()}>Add blunders</button>
     </div>
   </>
 }
