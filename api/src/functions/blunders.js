@@ -56,17 +56,19 @@ app.http('blunders', {
                 // Return sum in the desired format
                 return {
                     status: 200,
-                    jsonBody: [{ "$1": totalBlunders }]
+                    jsonBody: [{ "totalBlunders": totalBlunders }]
                 };
             }
             else if (request.method === 'POST') {
                 // Handle item creation
-                const { name, blunders } = await request.json();
+                let { name, blunders } = await request.json();
+                name === null ? name = "Default": name.toLowerCase();
+                const hash = await generateNumericHash(name.toLowerCase());
 
                 // Generate a unique id using uuidv4
                 const newItem = {
-                    id: await generateNumericHash(name.toLowerCase()), // Generate a unique ID for the new item
-                    name: name || "Default", // Default name if not provided
+                    id: hash, // Generate a unique ID for the new item
+                    name: name, // Default name if not provided
                     blunders: blunders || 1 // Default value if not provided
                 };
                 console.log("New items: ", newItem);

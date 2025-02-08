@@ -16,7 +16,7 @@ const Home = () => {
         return response.json();
       })
       .then((data) => {
-        const value = data[0]["$1"];
+        const value = data[0]["totalBlunders"];
         setBlunders(value);
       })
       .catch((error) => {
@@ -29,7 +29,8 @@ const Home = () => {
   }, []);
 
   const addBlunders = async (): Promise<void> => {
-    await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: 1})});
+    const totalBlunders: number = typeof blunders === "number" ? blunders : 0;
+    await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: totalBlunders+1})});
   }
 
   return <>
@@ -38,7 +39,11 @@ const Home = () => {
       <button onClick={() => navigate("/Items")}>Go to Items</button>
     </div>
     <div>
-      <button onClick={() => addBlunders()}>Add blunders</button>
+      <button onClick={async () => {
+        await callBlunders();
+        await addBlunders()
+        await callBlunders();
+      }}>Add blunders</button>
     </div>
   </>
 }
