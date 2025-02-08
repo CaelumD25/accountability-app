@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require('@azure/cosmos');
-const { v4: uuidv4 } = require('uuid'); // To generate unique IDs for new items
+const crypto = require('crypto');
 
 // Initialize Cosmos client outside the function for connection reuse
 let cosmosClient = null;
@@ -18,6 +18,21 @@ const initializeCosmosClient = async () => {
     }
     return container;
 };
+
+async function generateNumericHash(str) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = new Uint8Array(hashBuffer);
+
+    // Convert first 8 bytes to a 64-bit integer
+    let hashNum = 0n; // BigInt to avoid overflow
+    for (let i = 0; i < 8; i++) {
+        hashNum = (hashNum << 8n) | BigInt(hashArray[i]);
+    }
+
+    return Number(hashNum % BigInt(Number.MAX_SAFE_INTEGER)); // Ensure it's within JS safe number range
+}
 
 app.http('blunders', {
     methods: ['GET', 'POST'],
@@ -46,11 +61,11 @@ app.http('blunders', {
             }
             else if (request.method === 'POST') {
                 // Handle item creation
-                const { name, value } = await request.json();
+                const { name: string, value } = await request.json();
 
                 // Generate a unique id using uuidv4
                 const newItem = {
-                    id: uuidv4(), // Generate a unique ID for the new item
+                    id: await generateNumericHash(name.toLowerCase()), // Generate a unique ID for the new item
                     name: name || "Default", // Default name if not provided
                     blunders: value || 1 // Default value if not provided
                 };
