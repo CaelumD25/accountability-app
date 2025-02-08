@@ -12,8 +12,8 @@ const initializeCosmosClient = async () => {
             key: process.env.COSMOS_DB_KEY
         });
 
-        const database = cosmosClient.database(process.env.COSMOS_DATABASE_ID);
-        container = database.container(process.env.COSMOS_CONTAINER_ID);
+        const database = cosmosClient.database(process.env.COSMOS_DB_DATABASE);
+        container = database.container(process.env.COSMOS_DB_CONTAINER);
     }
     return container;
 };
