@@ -3,7 +3,7 @@ import {useNavigate} from "react-router-dom";
 
 
 const Home = () => {
-  const [blunders, setBlunders] = useState<[]|string>("Loading...")
+  const [blunders, setBlunders] = useState<[]|string|number>("Loading...")
 
   const navigate = useNavigate();
 
@@ -33,7 +33,7 @@ const Home = () => {
   }
 
   return <>
-    Blunders: {blunders.toString}
+    Blunders: {blunders}
     <div>
       <button onClick={() => navigate("/Items")}>Go to Items</button>
     </div>
