@@ -61,14 +61,15 @@ app.http('blunders', {
             }
             else if (request.method === 'POST') {
                 // Handle item creation
-                const { name: string, value } = await request.json();
+                const { name, blunders } = await request.json();
 
                 // Generate a unique id using uuidv4
                 const newItem = {
                     id: await generateNumericHash(name.toLowerCase()), // Generate a unique ID for the new item
                     name: name || "Default", // Default name if not provided
-                    blunders: value || 1 // Default value if not provided
+                    blunders: blunders || 1 // Default value if not provided
                 };
+                console.log("New items: ", newItem);
 
                 // Upsert the item into CosmosDB
                 const { resource: createdItem } = await container.items.upsert(newItem);
