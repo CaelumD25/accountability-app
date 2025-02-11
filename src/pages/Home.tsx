@@ -74,7 +74,7 @@ const Home = () => {
       console.log("Value", value);
       if (typeof totalBlunders == "number" && typeof value === "number" ) {
         params.append("blunders", String(value + totalBlunders));
-
+        setBlunders((prevState) => typeof prevState === "number"? prevState+value: prevState);
       } else {
         params.append("blunders", String(totalBlunders));
       }
