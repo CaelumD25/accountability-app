@@ -28,11 +28,11 @@ app.http('blunders', {
 
             if (request.method === 'GET') {
                 // Query all items and calculate the sum of blunders
-                const name = request.query.get("name").toLowerCase();
-                const querySpec = name!=null ?  {
+                const name = request.query.get("name");
+                const querySpec = name!==null ?  {
                     query: "SELECT SUM(c.blunders) AS totalBlunders FROM c WHERE c.name = @name",
                     parameters: [
-                        {name: "@name", value: name}
+                        { name: "@name", value: name ? name.toLowerCase() : null }
                     ]
                 }: {query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"};
 
@@ -40,9 +40,16 @@ app.http('blunders', {
                     .query(querySpec)
                     .fetchAll();
 
+                console.log(items)
+
                 const totalBlunders = items[0] ? items[0].totalBlunders : 0;
 
-                // Return sum in the desired format
+                if (isNaN(totalBlunders)) {
+                    return {
+                        status: 400,
+                        jsonBody: { message: "Invalid or missing 'blunders' parameter" }
+                    };
+                }
                 return {
                     status: 200,
                     jsonBody: [{ "totalBlunders": totalBlunders }]
@@ -71,7 +78,7 @@ app.http('blunders', {
                 };
             }
         } catch (error) {
-            context.error('Error processing request:', error);
+            console.error('Error processing request:', error);
             return {
                 status: 500,
                 jsonBody: {
