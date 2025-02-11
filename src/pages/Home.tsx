@@ -50,7 +50,7 @@ const Home = () => {
   const addBlunders = async (value: number): Promise<void> => {
     try {
       const totalBlunders = await callNamedBlunders(name);
-      await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: value + totalBlunders})});
+      await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: name, blunders: value + totalBlunders})});
     }
     catch (error) {
       console.log("Error adding blunders:", error);
