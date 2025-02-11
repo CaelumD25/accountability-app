@@ -6,6 +6,7 @@
     "id": { "type": "string" },
     "name": { "type": "string" },
     "blunders": { "type": "integer" }
+    "type": {"type": "string"}
   },
-  "required": ["id", "name"]
+  "required": ["id", "name", "type"]
 }

@@ -4,6 +4,7 @@ import {useNavigate} from "react-router-dom";
 
 const Home = () => {
   const [blunders, setBlunders] = useState<[]|string|number>("Loading...")
+  const [name, setName] = useState<string|null>("Loading...")
 
   const navigate = useNavigate();
 
@@ -24,13 +25,41 @@ const Home = () => {
       });
   }
 
+  const callNamedBlunders = async (name: string | null): Promise<number>  => {
+    return fetch("api/blunders", {method: "GET", body: JSON.stringify({name: name})}).then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+      .then((data) => {
+        return parseInt(data[0]["totalBlunders"]);
+      }).catch((error) => {
+        console.error("Error fetching data:", error);
+        return 0;
+      });
+  }
+
   useEffect(() => {
+    setName(sessionStorage.getItem("name"));
     callBlunders();
   }, []);
 
-  const addBlunders = async (): Promise<void> => {
-    const totalBlunders: number = typeof blunders === "number" ? blunders : 0;
-    await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: totalBlunders+1})});
+
+
+  const addBlunders = async (value: number): Promise<void> => {
+    try {
+      const totalBlunders = await callNamedBlunders(name);
+      await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: null, blunders: value + totalBlunders})});
+    }
+    catch (error) {
+      console.log("Error adding blunders:", error);
+    }
+  }
+
+  const updateName = (name: string) => {
+    sessionStorage.setItem("name", name);
+    setName(name);
   }
 
   return <>
@@ -41,9 +70,12 @@ const Home = () => {
     <div>
       <button onClick={async () => {
         await callBlunders();
-        await addBlunders()
+        await addBlunders(1)
         await callBlunders();
       }}>Add blunders</button>
+    </div>
+    <div>
+      <input onChange={(e) => updateName(e.target.value)} value={name || ""} />
     </div>
   </>
 }

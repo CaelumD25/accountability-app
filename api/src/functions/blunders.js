@@ -19,21 +19,6 @@ const initializeCosmosClient = async () => {
     return container;
 };
 
-async function generateNumericHash(str) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = new Uint8Array(hashBuffer);
-
-    // Convert first 8 bytes to a 64-bit integer
-    let hashNum = 0n; // BigInt to avoid overflow
-    for (let i = 0; i < 8; i++) {
-        hashNum = (hashNum << 8n) | BigInt(hashArray[i]);
-    }
-
-    return Number(hashNum % BigInt(Number.MAX_SAFE_INTEGER)); // Ensure it's within JS safe number range
-}
-
 app.http('blunders', {
     methods: ['GET', 'POST'],
     authLevel: 'anonymous',
@@ -43,9 +28,13 @@ app.http('blunders', {
 
             if (request.method === 'GET') {
                 // Query all items and calculate the sum of blunders
-                const querySpec = {
-                    query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"
-                };
+                const name = request.query.get("name").toLowerCase();
+                const querySpec = name!=null ?  {
+                    query: "SELECT SUM(c.blunders) AS totalBlunders FROM c WHERE c.name = @name",
+                    parameters: [
+                        {name: "@name", value: name}
+                    ]
+                }: {query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"};
 
                 const { resources: items } = await container.items
                     .query(querySpec)
@@ -61,24 +50,24 @@ app.http('blunders', {
             }
             else if (request.method === 'POST') {
                 // Handle item creation
-                let { name, blunders } = await request.json();
-                name === null ? name = "Default": name.toLowerCase();
-                const hash = await generateNumericHash(name.toLowerCase());
+                let name = request.query.get("name");
+                const blunders = parseInt(request.query.get("blunders"));
+                console.log("Request", name, blunders);
+                name = name === null ? "default" : name.toLowerCase();
+                const hash = crypto.createHash("md5").update(name).digest("hex");
 
-                // Generate a unique id using uuidv4
-                const newItem = {
-                    id: hash, // Generate a unique ID for the new item
-                    name: name, // Default name if not provided
-                    blunders: blunders || 1 // Default value if not provided
+                const newPerson = {
+                    id: hash,
+                    name: name,
+                    blunders: blunders,
+                    Type: "person"
                 };
-                console.log("New items: ", newItem);
 
-                // Upsert the item into CosmosDB
-                const { resource: createdItem } = await container.items.upsert(newItem);
+                const { resource: createdPerson } = await container.items.upsert(newPerson);
 
                 return {
-                    status: 201, // HTTP status for created resource
-                    jsonBody: createdItem // Return the created item
+                    status: 201,
+                    body: createdPerson
                 };
             }
         } catch (error) {
