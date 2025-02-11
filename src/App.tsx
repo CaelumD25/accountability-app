@@ -1,7 +1,6 @@
-import './App.css'
+import './index.css'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home.tsx"
-import Items from "./pages/Items.tsx"
 
 function App() {
 
@@ -9,7 +8,6 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home/>} />
-        <Route path="/Items" element={<Items/>} />
       </Routes>
     </Router>
   )

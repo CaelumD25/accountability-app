@@ -1,13 +1,10 @@
 import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-
+import { motion } from "motion/react";
 
 const Home = () => {
   const [blunders, setBlunders] = useState<[]|string|number>("Loading...")
   const [name, setName] = useState<string|null>("Loading...")
-
-  const navigate = useNavigate();
-
+  const [blundersContributed, setBlundersContributed] = useState<number>(0)
   const callBlunders = async ()  => {
     fetch("/api/blunders")
       .then(async (response) => {
@@ -43,6 +40,12 @@ const Home = () => {
   useEffect(() => {
     setName(sessionStorage.getItem("name"));
     callBlunders();
+    const getNamed = async () => {
+      const b = callNamedBlunders(name);
+      setBlundersContributed(await b);
+    }
+    getNamed()
+
   }, []);
 
 
@@ -60,23 +63,58 @@ const Home = () => {
   const updateName = (name: string) => {
     sessionStorage.setItem("name", name);
     setName(name);
+    callNamedBlunders(name)
   }
 
-  return <>
-    Blunders: {blunders}
-    <div>
-      <button onClick={() => navigate("/Items")}>Go to Items</button>
+
+
+  const text = "The Button".split(" ");
+
+  return <div className={"container"}>
+    <div className={"item"}>
+      <span style={{fontSize: "2em"}}>BLUNDERS:</span>
+      <div className={"blunders-box"}>
+        {blunders}
+      </div>
     </div>
-    <div>
-      <button onClick={async () => {
-        await callBlunders();
-        await addBlunders(1)
-        await callBlunders();
-      }}>Add blunders</button>
+    <motion.div
+      className="item"
+    >
+      <motion.button
+        onClick={async ()=> {
+          await callBlunders();
+          await addBlunders(1)
+          await callBlunders();
+        }}
+        whileTap={{scale: 0.9}}
+        transition={{type: "spring", stiffness: 400, damping: 25}}
+        initial={{scale: 0.6}}
+        animate={{scale: 1}}
+        whileHover={{scale: 1.1}}
+      >
+          {text.map((char, i) => (
+            <motion.span
+              key={`${char}-${i}`}
+              initial={{opacity: 0, y: 20}}
+              animate={{opacity: 1, y: 0}}
+              transition={{
+                duration: 0.4,
+                delay: i * 0.05,
+                ease: "easeOut"
+              }}
+            >
+              {char}
+              {i < text.length - 1 && " "}
+            </motion.span>
+          ))}
+      </motion.button>
+    </motion.div>
+    <div className={"item"}>
+      <input onChange={(e) => updateName(e.target.value)} value={name || ""} placeholder={"(Optional)Your Name"}/>
     </div>
-    <div>
-      <input onChange={(e) => updateName(e.target.value)} value={name || ""} />
+    <div className={"item"} style={{fontSize: "1em", color: "#3d3d3d"}}>
+      {name != "" ? "You've contributed: " + blundersContributed : ""}
     </div>
-  </>
+  </div>
 }
 export default Home;
