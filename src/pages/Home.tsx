@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import { motion } from "motion/react";
 
 const Home = () => {
-  const [blunders, setBlunders] = useState<[]|string|number>("Loading...")
+  const [blunders, setBlunders] = useState<string|number>("Loading...")
   const [name, setName] = useState<string|null>("Loading...")
   const [blundersContributed, setBlundersContributed] = useState<number>(0)
   const callBlunders = async ()  => {
@@ -23,7 +23,14 @@ const Home = () => {
   }
 
   const callNamedBlunders = async (name: string | null): Promise<number>  => {
-    return fetch("api/blunders", {method: "GET", body: JSON.stringify({name: name})}).then((response) => {
+
+    const url = new URL("api/blunders");
+    const params = new URLSearchParams();
+    if (name) {
+      params.append("name", name);
+    }
+    url.search = params.toString();
+    return fetch(url, {method: "GET"}).then((response) => {
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -52,8 +59,18 @@ const Home = () => {
 
   const addBlunders = async (value: number): Promise<void> => {
     try {
-      const totalBlunders = await callNamedBlunders(name);
-      await fetch("/api/blunders", {method: "POST", body: JSON.stringify({name: name, blunders: value + totalBlunders})});
+      const totalBlunders = await callNamedBlunders(name) ?? 0;
+
+      const url = new URL("api/blunders");
+      const params = new URLSearchParams();
+      if (name) {
+        params.append("name", name);
+      } else {
+        params.append("name", "default");
+      }
+      params.append("blunders", String(value + totalBlunders));
+      url.search = params.toString();
+      await fetch(url, {method: "POST"});
     }
     catch (error) {
       console.log("Error adding blunders:", error);
@@ -88,7 +105,6 @@ const Home = () => {
         onClick={async ()=> {
           await callBlunders();
           await addBlunders(1)
-          await callBlunders();
         }}
         whileTap={{scale: 0.9}}
         transition={{type: "spring", stiffness: 400, damping: 25}}
