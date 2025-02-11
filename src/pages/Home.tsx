@@ -23,8 +23,9 @@ const Home = () => {
   }
 
   const callNamedBlunders = async (name: string | null): Promise<number>  => {
+    const baseUrl = window.location.origin;
+    const url = new URL("api/blunders", baseUrl);
 
-    const url = new URL("api/blunders");
     const params = new URLSearchParams();
     if (name) {
       params.append("name", name);
@@ -60,8 +61,8 @@ const Home = () => {
   const addBlunders = async (value: number): Promise<void> => {
     try {
       const totalBlunders = await callNamedBlunders(name) ?? 0;
-
-      const url = new URL("api/blunders");
+      const baseUrl = window.location.origin;
+      const url = new URL("api/blunders", baseUrl);
       const params = new URLSearchParams();
       if (name) {
         params.append("name", name);
