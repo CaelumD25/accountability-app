@@ -63,7 +63,11 @@ const Home = () => {
   const updateName = (name: string) => {
     sessionStorage.setItem("name", name);
     setName(name);
-    callNamedBlunders(name)
+    const fetchNamedBlunders = async () => {
+      const b = callNamedBlunders(name)
+      setBlundersContributed(await b)
+    }
+    fetchNamedBlunders();
   }
 
 
