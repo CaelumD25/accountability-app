@@ -61,6 +61,7 @@ const Home = () => {
   const addBlunders = async (value: number): Promise<void> => {
     try {
       const totalBlunders = await callNamedBlunders(name) ?? 0;
+      console.log("Total Blunders", totalBlunders);
       const baseUrl = window.location.origin;
       const url = new URL("api/blunders", baseUrl);
       const params = new URLSearchParams();
@@ -69,7 +70,15 @@ const Home = () => {
       } else {
         params.append("name", "default");
       }
-      params.append("blunders", String(value + totalBlunders));
+
+      console.log("Value", value);
+      if (typeof totalBlunders == "number" && typeof value === "number" ) {
+        params.append("blunders", String(value + totalBlunders));
+
+      } else {
+        params.append("blunders", String(totalBlunders));
+      }
+
       url.search = params.toString();
       await fetch(url, {method: "POST"});
     }

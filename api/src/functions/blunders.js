@@ -63,6 +63,11 @@ app.http('blunders', {
                 name = name === null ? "default" : name.toLowerCase();
                 const hash = crypto.createHash("md5").update(name).digest("hex");
 
+                if (typeof blunders !== "number") {
+                    return {
+                        status: 400,
+                    }
+                }
                 const newPerson = {
                     id: hash,
                     name: name,
