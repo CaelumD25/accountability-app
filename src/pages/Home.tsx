@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import { motion } from "motion/react";
+import {CircularProgress} from "@mui/material";
 
 const Home = () => {
   const [blunders, setBlunders] = useState<string|number>("Loading...")
@@ -77,12 +78,15 @@ const Home = () => {
       if (!isNaN(totalNamedBlunders) && !isNaN(value) ) {
         params.append("blunders", String(value + totalNamedBlunders));
         setBlunders((prevState) => typeof prevState === "number" ? prevState+value : 0);
+        setBlundersContributed((prevState) => prevState+value);
       } else {
         params.append("blunders", String(totalNamedBlunders));
       }
 
       url.search = params.toString();
-      console.log(await fetch(url, {method: "POST"}));
+      const result = await fetch(url, {method: "POST"});
+      const data = await result.json();
+      setBlundersContributed(data.blunders);
     }
     catch (error) {
       console.log("Error adding blunders:", error);
@@ -118,7 +122,7 @@ const Home = () => {
         animate={{scale: 1}}
         whileHover={{scale: 1.1}}
       >
-          {text.map((char, i) => (
+          {buttonDisabled ? <CircularProgress/>:text.map((char, i) => (
             <motion.span
               key={`${char}-${i}`}
               initial={{opacity: 0, y: 20}}

@@ -77,9 +77,11 @@ app.http('blunders', {
 
                 const { resource: createdPerson } = await container.items.upsert(newPerson);
 
+                console.log()
+
                 return {
                     status: 201,
-                    body: createdPerson
+                    jsonBody: {blunders: createdPerson["blunders"]}
                 };
             }
         } catch (error) {
