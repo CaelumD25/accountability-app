@@ -109,7 +109,7 @@ const Home = () => {
           whileHover={{ scale: 1.1 }}
         >
           {buttonDisabled ? (
-            <CircularProgress />
+            <CircularProgress sx={{color: "red"}} />
           ) : (
             buttonText.map((char, i) => (
               <motion.span
