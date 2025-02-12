@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { CircularProgress } from "@mui/material";
 
-
-// API functions
+// Api Functions
 const api = {
   async getBlunders(): Promise<number> {
     const response = await fetch("/api/blunders");
@@ -26,12 +25,13 @@ const api = {
     return parseInt(data[0].totalBlunders);
   },
 
-  async addBlunders(name: string | null, blunderCount: number): Promise<number> {
+  async addBlunders(name: string | null, currentBlunders: number): Promise<number> {
     const baseUrl = window.location.origin;
     const url = new URL("api/blunders", baseUrl);
 
     url.searchParams.append("name", name || "default");
-    url.searchParams.append("blunders", String(blunderCount));
+    // Just add 1 instead of incrementing the current count
+    url.searchParams.append("blunders", String(currentBlunders + 1));
 
     const response = await fetch(url, { method: "POST" });
     if (!response.ok) throw new Error("Failed to add blunders");
@@ -72,7 +72,8 @@ const Home = () => {
     setButtonDisabled(true);
 
     try {
-      const newContributed = await api.addBlunders(name, blundersContributed + 1);
+      // Pass the current contributed blunders to the API
+      const newContributed = await api.addBlunders(name, blundersContributed);
       const newTotal = await api.getBlunders();
 
       setBlundersContributed(newContributed);
