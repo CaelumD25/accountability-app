@@ -5,6 +5,7 @@ const Home = () => {
   const [blunders, setBlunders] = useState<string|number>("Loading...")
   const [name, setName] = useState<string|null>("Loading...")
   const [blundersContributed, setBlundersContributed] = useState<number>(0)
+  const [buttonDisabled, setButtonDisabled] = useState<boolean>(false)
   const callBlunders = async ()  => {
     fetch("/api/blunders")
       .then(async (response) => {
@@ -59,9 +60,9 @@ const Home = () => {
 
 
   const addBlunders = async (value: number): Promise<void> => {
+    setButtonDisabled(true);
     try {
-      const totalBlunders = await callNamedBlunders(name) ?? 0;
-      console.log("Total Blunders", totalBlunders);
+
       const baseUrl = window.location.origin;
       const url = new URL("api/blunders", baseUrl);
       const params = new URLSearchParams();
@@ -71,33 +72,28 @@ const Home = () => {
         params.append("name", "default");
       }
 
-      console.log("Value", value);
-      if (typeof totalBlunders == "number" && typeof value === "number" ) {
-        params.append("blunders", String(value + totalBlunders));
-        setBlunders((prevState) => typeof prevState === "number"? prevState+value: prevState);
+      const totalNamedBlunders = await callNamedBlunders(name) ?? 0;
+
+      if (!isNaN(totalNamedBlunders) && !isNaN(value) ) {
+        params.append("blunders", String(value + totalNamedBlunders));
+        setBlunders((prevState) => typeof prevState === "number" ? prevState+value : 0);
       } else {
-        params.append("blunders", String(totalBlunders));
+        params.append("blunders", String(totalNamedBlunders));
       }
 
       url.search = params.toString();
-      await fetch(url, {method: "POST"});
+      console.log(await fetch(url, {method: "POST"}));
     }
     catch (error) {
       console.log("Error adding blunders:", error);
     }
+    setButtonDisabled(false);
   }
 
   const updateName = (name: string) => {
     sessionStorage.setItem("name", name);
     setName(name);
-    const fetchNamedBlunders = async () => {
-      const b = callNamedBlunders(name)
-      setBlundersContributed(await b)
-    }
-    fetchNamedBlunders();
   }
-
-
 
   const text = "The Button".split(" ");
 
@@ -112,9 +108,9 @@ const Home = () => {
       className="item"
     >
       <motion.button
+        disabled={buttonDisabled}
         onClick={async ()=> {
-          await callBlunders();
-          await addBlunders(1)
+          await addBlunders(1);
         }}
         whileTap={{scale: 0.9}}
         transition={{type: "spring", stiffness: 400, damping: 25}}
