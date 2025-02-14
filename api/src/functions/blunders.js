@@ -20,7 +20,7 @@ const initializeCosmosClient = async () => {
 };
 
 app.http('blunders', {
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PATCH'],
     authLevel: 'anonymous',
     handler: async (request, context) => {
         try {
@@ -28,19 +28,11 @@ app.http('blunders', {
 
             if (request.method === 'GET') {
                 // Query all items and calculate the sum of blunders
-                const name = request.query.get("name");
-                const querySpec = name!==null ?  {
-                    query: "SELECT SUM(c.blunders) AS totalBlunders FROM c WHERE c.name = @name",
-                    parameters: [
-                        { name: "@name", value: name ? name.toLowerCase() : null }
-                    ]
-                }: {query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"};
+                const querySpec = {query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"};
 
                 const { resources: items } = await container.items
                     .query(querySpec)
                     .fetchAll();
-
-                console.log(items)
 
                 const totalBlunders = items[0] ? items[0].totalBlunders : 0;
 
@@ -55,34 +47,35 @@ app.http('blunders', {
                     jsonBody: [{ "totalBlunders": totalBlunders }]
                 };
             }
-            else if (request.method === 'POST') {
-                // Handle item creation
-                let name = request.query.get("name");
-                const blunders = parseInt(request.query.get("blunders"));
-                console.log("Request", name, blunders);
-                name = name === null ? "default" : name.toLowerCase();
-                const hash = crypto.createHash("md5").update(name).digest("hex");
+            else if (request.method === 'PATCH'){
+                const add = parseInt(request.query.get("add"));
 
-                if (typeof blunders !== "number" || isNaN(blunders)) {
-                    return {
-                        status: 400,
-                    }
-                }
+                const querySpec = {query: "SELECT SUM(c.blunders) AS totalBlunders FROM c"};
+
+                const { resources: items } = await container.items
+                    .query(querySpec)
+                    .fetchAll();
+
+                const totalBlunders = items[0] ? items[0].totalBlunders : 0;
+
+                const newBlunders = add + totalBlunders;
+
+                const hash = crypto.createHash("md5").update("default").digest("hex");
+
                 const newPerson = {
                     id: hash,
-                    name: name,
-                    blunders: blunders,
+                    name: "default",
+                    blunders: newBlunders,
                     Type: "person"
                 };
 
                 const { resource: createdPerson } = await container.items.upsert(newPerson);
 
-                console.log()
-
                 return {
                     status: 201,
                     jsonBody: {blunders: createdPerson["blunders"]}
                 };
+
             }
         } catch (error) {
             console.error('Error processing request:', error);
