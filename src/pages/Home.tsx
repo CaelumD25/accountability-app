@@ -1,29 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { CircularProgress } from "@mui/material";
+import UndoIcon from '@mui/icons-material/Undo';
+import api from '../Api.ts';
 
-// Api Functions
-const api = {
-  async getBlunders(): Promise<number> {
-    const response = await fetch("/api/blunders");
-    if (!response.ok) throw new Error("Failed to fetch blunders");
-    const data = await response.json();
-    return data[0].totalBlunders;
-  },
-
-  async addBlunders(add: number): Promise<number> {
-    const baseUrl = window.location.origin;
-    const url = new URL("api/blunders", baseUrl);
-
-    url.searchParams.append("add", String(add));
-    // Just add 1 instead of incrementing the current count
-
-    const response = await fetch(url, { method: "PATCH" });
-    if (!response.ok) throw new Error("Failed to add blunders");
-    const data = await response.json();
-    return data.blunders;
-  }
-};
 
 const Home = () => {
   const [totalBlunders, setTotalBlunders] = useState<string | number>("Loading...");
@@ -42,18 +22,19 @@ const Home = () => {
       }
     };
 
-    initializeData();
+    initializeData().then(() => console.log("Finished loading"));
   }, []);
 
+  // Handles the pressing of buttons that increment or decrement the
   const handleModifyBlunder = async (add: number) => {
     if (buttonDisabled) return;
     setButtonDisabled(true);
 
     try {
-      // Pass the current contributed blunders to the API
-      const newContributed = await api.addBlunders(add);
+      // Add the blunders number to the current count
+      const newBlunders = await api.addBlunders(add);
 
-      setTotalBlunders(newContributed);
+      setTotalBlunders(newBlunders);
     } catch (error) {
       console.error("Error adding blunder:", error);
     } finally {
@@ -61,6 +42,7 @@ const Home = () => {
     }
   };
 
+  // For animation of writing The Button
   const buttonText = "The Button".split(" ");
 
   return (
@@ -115,9 +97,7 @@ const Home = () => {
         >
           {buttonDisabled ? (
               <CircularProgress sx={{color: "blue"}}/>
-          ) : ( <motion.span>
-                Remove Blunder
-              </motion.span>
+          ) : ( <UndoIcon/>
           )}
         </motion.button>
       </div>

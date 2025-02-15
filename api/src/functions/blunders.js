@@ -1,28 +1,11 @@
 const { app } = require('@azure/functions');
-const { CosmosClient } = require('@azure/cosmos');
 const crypto = require('crypto');
-
-// Initialize Cosmos client outside the function for connection reuse
-let cosmosClient = null;
-let container = null;
-
-const initializeCosmosClient = async () => {
-    if (!cosmosClient) {
-        cosmosClient = new CosmosClient({
-            endpoint: process.env.COSMOS_DB_ENDPOINT,
-            key: process.env.COSMOS_DB_KEY
-        });
-
-        const database = cosmosClient.database(process.env.COSMOS_DB_DATABASE);
-        container = database.container(process.env.COSMOS_DB_CONTAINER);
-    }
-    return container;
-};
+const initializeCosmosClient = require("../cosmosDb");
 
 app.http('blunders', {
     methods: ['GET', 'POST', 'PATCH'],
     authLevel: 'anonymous',
-    handler: async (request, context) => {
+    handler: async (request) => {
         try {
             const container = await initializeCosmosClient();
 

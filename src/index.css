@@ -17,7 +17,6 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  min-height: 100vh;
   flex-direction: column;
   flex: 1;
   font-family: "Titan One", serif;
@@ -39,10 +38,8 @@ div.item {
 }
 
 div.sub-item {
-  background-color: #1e1e1e;
   border-radius: 10px;
   padding: 10px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
 }
 
 button {
@@ -60,31 +57,31 @@ button.blunder-button {
   border-color: #1a1a1a;
   border-style: solid;
   background-color: #9e0000;
-  box-shadow: rgba(50, 50, 93, 0.15) 0px 15px 30px -6px inset,
-  rgba(0, 0, 0, 0.2) 0px 9px 18px -9px inset,
-  rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  box-shadow: rgba(50, 50, 93, 0.15) 0 15px 30px -6px inset,
+  rgba(0, 0, 0, 0.2) 0 9px 18px -9px inset,
+  rgba(0, 0, 0, 0.15) 2px 2px 3px;
 }
 
 button.undo-button {
-  font-size: 1em;
-  height: 100px;
-  width: 100px;
+  background-color: rgba(0, 0, 0, 0);
+  border: 0;
   border-radius: 100%;
-  border-width: 10px;
-  border-color: #1a1a1a;
-  border-style: solid;
-  background-color: #006c9e;
-  box-shadow: rgba(50, 50, 93, 0.15) 0px 15px 30px -6px inset,
-  rgba(0, 0, 0, 0.2) 0px 9px 18px -9px inset,
-  rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  padding: 10px;
+}
+
+button.undo-button:hover {
+  box-shadow: rgba(0, 0, 0, 0.15) 2px 2px 3px;
+}
+button.undo-button:active {
+  box-shadow: rgba(0, 0, 0, 0.15) 2px 2px 3px;
 }
 
 .blunders-box {
   background-color: #ffffff;
-  padding: 16px;
+  padding: 10px 20px;
   border-radius: 10px;
   color: #242424;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;
+  box-shadow: rgba(50, 50, 93, 0.25) 0 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0 18px 36px -18px inset;
 }
 
 input {
@@ -117,9 +114,6 @@ input:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
-
-
-
 
 .button:hover {
   box-shadow: 0 0 25px rgba(0, 255, 255, 0.8), 0 0 50px rgba(0, 255, 255, 0.5); /* Stronger neon glow on hover */
