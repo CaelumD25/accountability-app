@@ -11,20 +11,6 @@ const api = {
     return data[0].totalBlunders;
   },
 
-  async getNamedBlunders(name: string | null): Promise<number> {
-    const baseUrl = window.location.origin;
-    const url = new URL("api/blunders", baseUrl);
-
-    if (name) {
-      url.searchParams.append("name", name);
-    }
-
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch named blunders");
-    const data = await response.json();
-    return parseInt(data[0].totalBlunders);
-  },
-
   async addBlunders(add: number): Promise<number> {
     const baseUrl = window.location.origin;
     const url = new URL("api/blunders", baseUrl);
@@ -32,7 +18,7 @@ const api = {
     url.searchParams.append("add", String(add));
     // Just add 1 instead of incrementing the current count
 
-    const response = await fetch(url, { method: "POST" });
+    const response = await fetch(url, { method: "PATCH" });
     if (!response.ok) throw new Error("Failed to add blunders");
     const data = await response.json();
     return data.blunders;
