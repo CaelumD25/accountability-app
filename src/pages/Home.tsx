@@ -25,13 +25,12 @@ const api = {
     return parseInt(data[0].totalBlunders);
   },
 
-  async addBlunders(name: string | null, currentBlunders: number): Promise<number> {
+  async addBlunders(add: number): Promise<number> {
     const baseUrl = window.location.origin;
     const url = new URL("api/blunders", baseUrl);
 
-    url.searchParams.append("name", name || "default");
+    url.searchParams.append("add", String(add));
     // Just add 1 instead of incrementing the current count
-    url.searchParams.append("blunders", String(currentBlunders + 1));
 
     const response = await fetch(url, { method: "POST" });
     if (!response.ok) throw new Error("Failed to add blunders");
@@ -42,23 +41,16 @@ const api = {
 
 const Home = () => {
   const [totalBlunders, setTotalBlunders] = useState<string | number>("Loading...");
-  const [name, setName] = useState<string | null>("Loading...");
-  const [blundersContributed, setBlundersContributed] = useState<number>(0);
   const [buttonDisabled, setButtonDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     const initializeData = async () => {
-      const storedName = sessionStorage.getItem("name");
-      setName(storedName);
-
       try {
-        const [total, contributed] = await Promise.all([
+        const [total] = await Promise.all([
           api.getBlunders(),
-          api.getNamedBlunders(storedName)
         ]);
 
         setTotalBlunders(total);
-        setBlundersContributed(contributed);
       } catch (error) {
         console.error("Error initializing data:", error);
       }
@@ -67,27 +59,21 @@ const Home = () => {
     initializeData();
   }, []);
 
-  const handleAddBlunder = async () => {
+  const handleModifyBlunder = async (add: number) => {
     if (buttonDisabled) return;
     setButtonDisabled(true);
 
     try {
       // Pass the current contributed blunders to the API
-      const newContributed = await api.addBlunders(name, blundersContributed);
-      const newTotal = await api.getBlunders();
+      const newContributed = await api.addBlunders(add);
 
-      setBlundersContributed(newContributed);
-      setTotalBlunders(newTotal);
+      setTotalBlunders(newContributed);
     } catch (error) {
       console.error("Error adding blunder:", error);
     } finally {
       setButtonDisabled(false);
     }
   };
-
-  const handleSubtractBlunder = () => {
-
-  }
 
   const buttonText = "The Button".split(" ");
 
@@ -101,12 +87,13 @@ const Home = () => {
       <motion.div className="item">
         <motion.button
           disabled={buttonDisabled}
-          onClick={handleAddBlunder}
+          onClick={() => handleModifyBlunder(1)}
           whileTap={{ scale: 0.9 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
           initial={{ scale: 0.6 }}
           animate={{ scale: 1 }}
           whileHover={{ scale: 1.1 }}
+          className={"blunder-button"}
         >
           {buttonDisabled ? (
             <CircularProgress sx={{color: "red"}} />
@@ -129,35 +116,22 @@ const Home = () => {
           )}
         </motion.button>
       </motion.div>
-
-      <div className="item">
+      <div className="item sub-item">
         <motion.button
             disabled={buttonDisabled}
-            onClick={handleSubtractBlunder}
+            onClick={() => handleModifyBlunder(-1)}
             whileTap={{scale: 0.9}}
             transition={{type: "spring", stiffness: 400, damping: 25}}
             initial={{scale: 0.6}}
             animate={{scale: 1}}
             whileHover={{scale: 1.1}}
+            className={"undo-button"}
         >
           {buttonDisabled ? (
-              <CircularProgress sx={{color: "red"}}/>
-          ) : (
-              buttonText.map((char, i) => (
-                  <motion.span
-                      key={`${char}-${i}`}
-                      initial={{opacity: 0, y: 20}}
-                      animate={{opacity: 1, y: 0}}
-                      transition={{
-                        duration: 0.4,
-                        delay: i * 0.05,
-                        ease: "easeOut"
-                      }}
-                  >
-                    {char}
-                    {i < buttonText.length - 1 && " "}
-                  </motion.span>
-              ))
+              <CircularProgress sx={{color: "blue"}}/>
+          ) : ( <motion.span>
+                Remove Blunder
+              </motion.span>
           )}
         </motion.button>
       </div>
