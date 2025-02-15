@@ -16,4 +16,4 @@ const initializeCosmosClient = async () => {
     return container;
 };
 
-export default initializeCosmosClient;
+module.exports = { initializeCosmosClient };

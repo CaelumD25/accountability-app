@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions');
 const crypto = require('crypto');
-const initializeCosmosClient = require("../cosmosDb");
+const {initializeCosmosClient} = require("../cosmosDb");
 
 app.http('blunders', {
     methods: ['GET', 'POST', 'PATCH'],
